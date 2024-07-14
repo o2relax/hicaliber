@@ -1,5 +1,4 @@
 <script setup>
-import {useForm} from 'laravel-precognition-vue';
 import {onMounted, reactive, ref, watch} from "vue";
 
 const baseUrl = reactive(new URL(window.location.href));
