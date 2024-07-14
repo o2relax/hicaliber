@@ -11,6 +11,8 @@ const pagination = reactive({
   page: baseUrl.searchParams.get('page') ?? 1,
 })
 
+const processing = ref(false);
+
 const filters = reactive({
   q: baseUrl.searchParams.get('q') ?? null,
   bedrooms: baseUrl.searchParams.get('bedrooms') ?? null,
@@ -22,11 +24,15 @@ const filters = reactive({
 })
 
 function load() {
+  processing.value = true;
   axios.get('/api/v1/entities', {params: {...pagination, ...filters}})
       .then((response) => {
         entities.value = response.data.data;
         pagination.perPage = response.data.meta.per_page;
         total.value = response.data.meta.total
+      })
+      .finally(() => {
+        processing.value = false;
       })
 }
 
@@ -86,14 +92,17 @@ watch(pagination, () => {
                 </el-col>
               </el-form-item>
               <el-form-item>
-                <el-button type="primary" @click.prevent="load">Search</el-button>
+                <el-button type="primary" @click.prevent="load">
+                  <el-icon class="is-loading" v-if="processing">
+                    <Loading />
+                  </el-icon>
+                  Search
+                </el-button>
                 <el-button @click.prevent="clearFilters">Clear</el-button>
               </el-form-item>
             </el-form>
-
           </el-card>
         </el-space>
-
         <el-table :data="entities" style="width: 100%">
           <el-table-column prop="name" label="Name"/>
           <el-table-column prop="price" label="Price"/>
